@@ -1,0 +1,121 @@
+% ****** Start of file apssamp.tex ******
+%
+%   This file is part of the APS files in the REVTeX 4.1 distribution.
+%   Version 4.1r of REVTeX, August 2010
+%
+%   Copyright (c) 2009, 2010 The American Physical Society.
+%
+%   See the REVTeX 4 README file for restrictions and more information.
+%
+% TeX'ing this file requires that you have AMS-LaTeX 2.0 installed
+% as well as the rest of the prerequisites for REVTeX 4.1
+%
+% See the REVTeX 4 README file
+% It also requires running BibTeX. The commands are as follows:
+%
+%  1)  latex apssamp.tex
+%  2)  bibtex apssamp
+%  3)  latex apssamp.tex
+%  4)  latex apssamp.tex
+%
+\documentclass[%
+ reprint,
+%superscriptaddress,
+%groupedaddress,
+%unsortedaddress,
+%runinaddress,
+%frontmatterverbose, 
+%preprint,
+%showpacs,preprintnumbers,
+%nofootinbib,
+%nobibnotes,
+%bibnotes,
+ amsmath,amssymb,
+%aps,
+%pra,
+prb,
+%rmp,
+%prstab,
+%prstper,
+%floatfix,
+]{revtex4-1}
+
+
+\usepackage{enumitem}
+\setlist{nosep}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{hyperref}% add hypertext capabilities
+%\usepackage[mathlines]{lineno}% Enable numbering of text and display math
+%\linenumbers\relax % Commence numbering lines
+
+%\usepackage[showframe,%Uncomment any one of the following lines to test 
+%%scale=0.7, marginratio={1:1, 2:3}, ignoreall,% default settings
+%%text={7in,10in},centering,
+%%margin=1.5in,
+%%total={6.5in,8.75in}, top=1.2in, left=0.9in, includefoot,
+%%height=10in,a5paper,hmargin={3cm,0.8in},
+%]{geometry}
+
+\begin{document}
+
+\preprint{APS/123-QED}
+
+\title{ Electron force-field for efficient representation and optimization of molecular structures }
+
+\author{Prokop Hapala}
+
+\affiliation{FZU - Institute of physics of Czech Academy of Science }
+\begin{abstract}
+
+
+
+\begin{description}
+\item[PACS numbers]
+\item[Structure]
+\end{description}
+\end{abstract}
+\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
+                             % Classification Scheme.
+%\keywords{Suggested keywords}%Use showkeys class option if keyword
+                              %display desired
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+Advanced reactive forcefields like ReaxFF and more recent developments of interatomic potentials based on machine learning techniques allows to close the gap between atomistic and mesoscopic simulations of materials and chemical processes. Great examplea RE simulations of coal combustion \cite{}, propagation of fractures \cite{} and crystalization of alloys \cite{}. Generally these force-field are formulated in terms of atomic species and their positions, avoiding explicit description of electronic structure. This design decision on one hand significantly reduce number of parameters required to represent state of the system (as there is typically many more electrons than nuclei). On the other hand this pose fundamental limitations on use of such methods, to study only processes where electronic degrees of freedom are not importaint, and follow the nuclei according to Born-Openhaimer approximation. Non-adiabiatic processes induced by electromagnetic radiation or processes in highly excited hot matter cannot be treated using these methods. 
+
+Whats more importaint, even in common cold chemical processes at room temperature typical force-field have to deal with electronic degrees of freedom at least implicitly. Presence of terms depending on atomic charge, bond-order and polarization are examples of such implicit description of electrons. Therefore it is reasonable to ask whether it would not be more efficient to design an interatomic atomic force-field where electronic degrees of freedom are explicitly represented using terms derived form quantum theory. 
+
+An important obstacle to such approach is the fact that quantum theory of Fermions - as formulated in early 20-th centrury - leads to highly non-local problem in form of large dense matrices. For large systems these matrices are not only hard to solve and store in memory, but also this representation of system is highly redundant and ambiguous. For example arbitrary rotation in space of degenerate single particle states (molecular orbitals) represent identialc syste, and density matrix of such large system typically contains huge number nearly-zero elements. This makes it very difficult to use such representation for robust fitting of interatomic forcefield especially in context of machine learning.
+
+The fundamental origins of this problem is the Pauli exclusin principle, which leads to variational search for large number of mutually orthogonal single particle states (molecular orbitals). This is the very same reason which hampers atempt to develop computationally efficient orbital-less density function theory methods. In addition, the fact that these functions are constructed as linear combination from a shared set basis functions makes the molecular orbitals generally delocalized over the whole system. In such case ensuring the orthogonality constrains generally scales with number of degrees of freedom N as O(N$^3$) and evaluation of exact exchange (the Fock operator) as O(N$^4$).
+
+In contrast, most of chemistry (at least for organic molecules and other insulators) can be represented using rather localized chemical bonds, and related concept of natural bond orbitals. This fact suggest that at least for this kind of system much more localized representation of electronic structure should be possible.
+
+Indeed, relatively old idea of electron force-field (eFF) and related wave-packed molecular dynamics can describe chemical reaction, and even non-adiabatic processes with highly excited electrons in hot matter composed of light elements (hydrogen, lithium, carbon) using only single spherical Gaussians for description of each electron. This huge reduction of computational complexity is achieved by approximation of Pauli electron principle by artificial Pauli repulsion term which energetically penalized overlap between different electrons of the same spin. The variational flexibility of the wavefunction is provided by moving the centre and chaning the size of the gaussian, rather than changing the coefficient of expansion in fixed atom-centered basis, as is typical for other electronic structure methods. 
+
+Nevertheless, original formulation of eFF, as good as it is for high-energy physics of light elements, is rather crude approximation for more delicate chemistry at room temperature, fail to reproduce fine structure and energetics of aromatic compounds, and in original version cannot deal with heavier elements  like silicon and Aluminium. In later versions the forcefield was improved by adding pseudopotentials and interactions reflecting electrons with higher angular momentum (orbitals with angular p-functions).
+
+In this paper we propose to significantly generalize the eFF by expressing each localized single electron function by linear combination of small number of floating Gaussians. This allows much better approximation of true natural bond orbitals e.g. of p for aromatic systems. For most common chemical problems 2-4 basis function per molecular orbials should be sufficient. Crucial to keep computational cost low, is to enforce localization of these wavefunction by artifical constrains (if form of springs) which keep the centers of basis-functions forming one molecular orbial close to each other. Together with similar constrain imposed on spatial spread of each Gaussian this guarantee that in any chemically reasonable low-energy structure each electron overlaps only with small number of others. This allows to express all term in the hamiltonina (including kinetic energy, Pauli repulsion approximation, electronstatics, and even Fock exact exchange) naively in O(N$^2$) iterations and in O(NlogN) iterations when acceleration techniques (such as Fast Multipole Method) are used. In fact the formulation and evaluation of the force-field is still formally very similar to fomulation classical interatomic forcefields, and same accelaration methods can be used. The fact that evaluation of forces does not rely on any matrix algebra makes it easy to integrate within framework of diferentiable programming which is crucial for machine learning applications. Derivative of the wavefunction with respect to any parameter can be expressed in closed form using only small number of terms, which is (expect for electrostatics) completely local and independent of system size. 
+
+\section{Methods}
+
+\subsection{Electron force-field for multi-center wave-functions}
+
+\subsection{Electron forcefield as Machine-Learning descriptor}
+
+While commonplace descriptors used in neural networks and other machine-learned potentials (such as Behler-Parrinelo symmetry functions, SOAP) are motivated more by mathematical convenience than by underlaying physics or chemical intuition, in the end they surprisingly well reflect intuitive chemical concepts such as angular symmetry of wavefunction given by spherical harmonics, bond-lengths and bond-orders. Therefore it seems very reasonable to use electron orbitals, which shape and symmetry is fundamentally responsible for bond-angles and bond-lengths as a basis for representation of molecular structures for machine learning.     
+
+
+\section{Results}
+
+
+
+\section{Conclusion}
+
+\end{document}
